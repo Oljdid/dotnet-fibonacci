@@ -6,7 +6,6 @@ RUN dotnet publish "Demo.csproj" -c Release -r linux-musl-x64  \
     /p:PublishAot=true /p:PublishTrimmed=true  \
     /p:PublishReadyToRun=true -o /publish
 
-FROM docker.io/library/alpine:latest AS base
 WORKDIR /app
 COPY --from=build /publish .
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
