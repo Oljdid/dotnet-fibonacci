@@ -1,43 +1,53 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.Extensions.Logging;
 
-namespace Leonardo;
-
-public partial class FibonacciDataContext : DbContext
+namespace Leonardo
 {
-    public FibonacciDataContext()
+    public partial class FibonacciDataContext : DbContext
     {
-    }
-
-    public FibonacciDataContext(DbContextOptions<FibonacciDataContext> options)
-        : base(options)
-    {
-    }
-
-    public virtual DbSet<TFibonacci> TFibonaccis { get; set; }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Data Source=localhost,1433;Initial Catalog=FibonacciData;Integrated Security=False;User ID=sa;Password=Your_password123;MultipleActiveResultSets=True;TrustServerCertificate=True");
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<TFibonacci>(entity =>
+        public FibonacciDataContext()
         {
-            entity.HasKey(e => e.FibId).HasName("PK_Fibonacci");
+        }
 
-            entity.ToTable("T_Fibonacci", "sch_fib");
+        public FibonacciDataContext(DbContextOptions<FibonacciDataContext> options)
+            : base(options)
+        {
+        }
 
-            entity.Property(e => e.FibId)
-                .HasDefaultValueSql("(newid())")
-                .HasColumnName("FIB_Id");
-            entity.Property(e => e.FibInput).HasColumnName("FIB_Input");
-            entity.Property(e => e.FibOutput).HasColumnName("FIB_Output");
-        });
+        public virtual DbSet<TFibonacci> TFibonaccis { get; set; } = null!;
 
-        OnModelCreatingPartial(modelBuilder);
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<TFibonacci>(entity =>
+            {
+                entity.HasKey(e => e.FibId)
+                    .HasName("PK_Fibonacci");
+
+                entity.ToTable("T_Fibonacci", "sch_fib");
+
+                entity.Property(e => e.FibId)
+                    .HasColumnName("FIB_Id")
+                    .HasDefaultValueSql("(newid())");
+
+                entity.Property(e => e.FibCreatedTimestamp)
+                    .HasColumnName("FIB_CreatedTimestamp")
+                    .HasDefaultValueSql("('0001-01-01T00:00:00.0000000')");
+                
+                entity.Property(e => e.FibLastExecutionTimestamp)
+                    .HasColumnName("FIB_FibLastExecutionTimestamp")
+                    .HasDefaultValueSql("('0001-01-01T00:00:00.0000000')");
+
+                entity.Property(e => e.FibInput).HasColumnName("FIB_Input");
+
+                entity.Property(e => e.FibOutput).HasColumnName("FIB_Output");
+            });
+
+            OnModelCreatingPartial(modelBuilder);
+        }
+
+        partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     }
-
-    partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
 }
